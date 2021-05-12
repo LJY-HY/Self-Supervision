@@ -74,8 +74,9 @@ def main():
     
     # Linear Setting
     path = './checkpoint/'+args.in_dataset+'/'+args.arch+'_'+args.mode+'_proj_'+str(args.proj_noise_rate)+'_linear_'+str(args.linear_noise_rate)+'_trial_'+args.trial
-    args.lr = 5.
-    args.epoch = 100
+    args.lr = 0.1
+    args.wd = 1e-4
+    args.epoch = 50
     optimizer_linear, scheduler_linear = get_optim_scheduler(args,net)
 
     # Linear Training
@@ -139,7 +140,7 @@ def linear_train(args, net, train_linear_dataloader, optimizer, scheduler, XentL
     train_loss = 0
     p_bar = tqdm(range(train_linear_dataloader.__len__()))
     for batch_idx, (images, labels, true_labels) in enumerate(train_linear_dataloader):
-        images, labels = images[0].to(args.device), labels.to(args.device)     
+        images, labels = images.to(args.device), labels.to(args.device)     
         optimizer.zero_grad()
         outputs = net(images,mode = forward_part)
         loss = XentLoss(outputs,labels)
