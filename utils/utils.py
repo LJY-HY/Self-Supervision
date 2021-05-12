@@ -56,7 +56,7 @@ def get_transform(args,mode):
         normalize = transforms.Normalize(mean = cifar10_mean, std = cifar10_std)
         
     if mode == 'train':
-        train_TF = transforms.Compose([
+        train_proj_TF = transforms.Compose([
             transforms.RandomResizedCrop(size = 32, scale = (0.2,1.)),
             transforms.RandomHorizontalFlip(),
             transforms.RandomApply([
@@ -66,11 +66,17 @@ def get_transform(args,mode):
             transforms.ToTensor(),
             normalize,
             ])
+        train_linear_TF = transforms.Compose([
+            transforms.RandomHorizontalFlip(),
+            transforms.RandomCrop(size=32, padding = int(32*0.125)),
+            transforms.ToTensor(),
+            normalize,
+        ])
         test_TF = transforms.Compose([
         transforms.ToTensor(),
         normalize,
         ])
-        return TwoCropTransform(train_TF), test_TF
+        return TwoCropTransform(train_proj_TF), train_linear_TF, test_TF
     elif mode == 'eval':
         train_TF = transforms.Compose([
             transforms.RandomHorizontalFlip(),
