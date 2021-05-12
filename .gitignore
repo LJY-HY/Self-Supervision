@@ -6,3 +6,4 @@ checkpoint/*
 *.sh
 sh/*
 output/
+SupConLoss/

@@ -55,7 +55,7 @@ def get_transform(args,mode):
     elif args.in_dataset == 'svhn':
         normalize = transforms.Normalize(mean = cifar10_mean, std = cifar10_std)
         
-    if mode == 'projection':
+    if mode == 'train':
         train_TF = transforms.Compose([
             transforms.RandomResizedCrop(size = 32, scale = (0.2,1.)),
             transforms.RandomHorizontalFlip(),
@@ -71,23 +71,6 @@ def get_transform(args,mode):
         normalize,
         ])
         return TwoCropTransform(train_TF), test_TF
-    elif mode == 'linear':
-        train_TF = transforms.Compose([
-            transforms.RandomResizedCrop(size = 32, scale = (0.2,1.)),
-            transforms.RandomHorizontalFlip(),
-            transforms.RandomApply([
-                transforms.ColorJitter(0.4,0.4,0.4,0.1)
-                ],p=0.8),
-            transforms.RandomGrayscale(p=0.2),
-            transforms.ToTensor(),
-            normalize,
-            ])
-        test_TF = transforms.Compose([
-        transforms.ToTensor(),
-        normalize,
-        ])
-        return train_TF, test_TF
-
     elif mode == 'eval':
         train_TF = transforms.Compose([
             transforms.RandomHorizontalFlip(),
@@ -195,28 +178,3 @@ class CosineAnnealingWarmupRestarts(_LRScheduler):
         for param_group, lr in zip(self.optimizer.param_groups, self.get_lr()):
             param_group['lr'] = lr
 
-
-def count_layer(net):
-    number_of_layer=0
-    for child in net.children():
-        if type(child)==torch.nn.modules.container.Sequential:
-            number_of_layer+=1
-    return number_of_layer
-
-def freeze_model(net):
-    for param in net.parameters():
-        param.requires_grad = False
-
-def enable_layer(net,steps):
-    '''
-    regards 'Sequential' layer as main points of CNN
-    this method enables [steps]'th Sequential layer trainable
-    '''
-    layer_count=0
-    for child in net.children():
-        for param in child.parameters():
-                param.requires_grad=True
-        if type(child)==torch.nn.modules.container.Sequential:
-            layer_count+=1
-        if layer_count==steps:
-            return 1

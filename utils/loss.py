@@ -1,19 +1,23 @@
 import torch
 import torch.nn as nn
+import torch.distributions.dirichlet as diri
 
 class SupConLoss(nn.Module):
     """SupConLoss class support both supervised version(SupCon) and unsupervised version(SimCLR)"""
-    def __init__(self,temperature = 0.07, base_temperature = 0.07, contrast = True):
+    def __init__(self,temperature = 0.07, base_temperature = 0.07, contrast = True, mode = 'SupCon', mixup = False):
         super(SupConLoss,self).__init__()
+        self.mixup = mixup
+        self.mode = mode
         self.temperature = temperature
         self.base_temperatrue= base_temperature
         self.contrast = contrast
 
-    def forward(self,features, labels):
+    def forward(self,features, labels=None):
         """"Compute Contrastive Loss
         1. Input 
             features    : [bsz*contrast_count, feature_dim]
-            labels      : [bsz]
+            labels      : in case of None,  "SimCLR"
+                          in case of [bsz], "SupCon"
         2. Value derived in the middle
             sim_matrix  : values of dot product between z(i)s
                           [bsz*contrast_count, bsz*contrast_count]
@@ -27,7 +31,7 @@ class SupConLoss(nn.Module):
                   else torch.device('cpu'))
         bsz = labels.shape[0]
         contrast_count = int(features.shape[0]/bsz)
-
+                 
         # Make sim_matrix
         sim_matrix = torch.matmul(features, features.T)
         sim_matrix = torch.div(sim_matrix, self.temperature)
@@ -36,7 +40,10 @@ class SupConLoss(nn.Module):
 
         # Make mask
         labels = labels.contiguous().view(-1,1)
-        mask = torch.eq(labels, labels.T).float()
+        if self.mode == 'SimCLR':
+            mask = torch.eye(bsz,dtype=torch.float32).to(device)
+        elif self.mode == 'SupCon':
+            mask = torch.eq(labels, labels.T).float()
         mask = mask.repeat(contrast_count,contrast_count)
 
         # Exclude self-contrast from mask

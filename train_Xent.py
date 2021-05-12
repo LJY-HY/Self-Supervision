@@ -8,6 +8,7 @@ from tqdm import tqdm
 import argparse
 from utils.arguments import get_arguments
 from utils.utils import *
+from dataset.cifar import *
 
 def main():
     # Argument parsing
@@ -22,8 +23,7 @@ def main():
         args.num_classes=100
 
     # Get Dataloader
-    transform = get_transform(args)
-    train_dataloader, test_dataloader = globals()[args.in_dataset](args, transform)
+    train_dataloader, test_dataloader = globals()[args.in_dataset](args, mode = 'linear')
 
     # Get architecture
     net = get_architecture(args)
@@ -32,7 +32,7 @@ def main():
     optimizer, scheduler = get_optim_scheduler(args,net)
        
     CE_loss = nn.CrossEntropyLoss()
-    path = './checkpoint/'+args.in_dataset+'/'+args.arch+'_trial_'+args.trial
+    path = './checkpoint/'+args.in_dataset+'/'+args.arch+'_Xent_'+str(args.noise_rate)+'_trial_'+args.trial
     best_acc=0
     for epoch in range(args.epoch):
         train(args, net, train_dataloader, optimizer, scheduler, CE_loss, epoch)
@@ -48,8 +48,7 @@ def train(args, net, train_dataloader, optimizer, scheduler, CE_loss, epoch):
     net.train()
     train_loss = 0
     p_bar = tqdm(range(train_dataloader.__len__()))
-    loss_average = 0
-    for batch_idx, (inputs, targets) in enumerate(train_dataloader):
+    for batch_idx, (inputs, targets,targets_true) in enumerate(train_dataloader):
         inputs, targets = inputs.to(args.device), targets.to(args.device)     
         optimizer.zero_grad()
         outputs = net(inputs)
@@ -62,7 +61,7 @@ def train(args, net, train_dataloader, optimizer, scheduler, CE_loss, epoch):
                     epochs=args.epoch,
                     batch=batch_idx + 1,
                     iter=train_dataloader.__len__(),
-                    lr=scheduler.get_last_lr()[0],
+                    lr=scheduler.optimizer.param_groups[0]['lr'],
                     loss = train_loss/(batch_idx+1))
                     )
         p_bar.update()
@@ -85,7 +84,7 @@ def test(args, net, test_dataloader, optimizer, scheduler, CE_loss, epoch):
                     epochs=1,
                     batch=batch_idx + 1,
                     iter=test_dataloader.__len__(),
-                    lr=scheduler.get_last_lr()[0],
+                    lr=scheduler.optimizer.param_groups[0]['lr'],
                     loss=test_loss/(batch_idx+1)))
             p_bar.update()
             acc+=sum(outputs.argmax(dim=1)==targets)
