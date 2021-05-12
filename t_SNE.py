@@ -26,7 +26,7 @@ def main():
 
     # Get Dataloader
     args.noise_rate = args.proj_noise_rate
-    _, _, test_dataloader = globals()[args.in_dataset](args,mode = 'train')
+    train_proj_dataloader, train_linear_dataloader, test_dataloader = globals()[args.in_dataset](args,mode = 'train')
    
     # Get architecture
     net = get_architecture(args)
@@ -36,7 +36,8 @@ def main():
     scheduler = optim.lr_scheduler.MultiStepLR(optimizer, [10,15],gamma=0.2)
 
     # Get model ckpt
-    checkpoint = torch.load('./checkpoint/'+args.in_dataset+'/'+args.arch+'_'+args.mode+'_proj_'+str(args.proj_noise_rate)+'_linear_'+str(args.linear_noise_rate)+'_trial_'+args.trial)
+    # checkpoint = torch.load('./checkpoint/'+args.in_dataset+'/'+args.arch+'_'+args.mode+'_proj_'+str(args.proj_noise_rate)+'_linear_'+str(args.linear_noise_rate)+'_trial_'+args.trial)
+    checkpoint = torch.load('./checkpoint/'+args.in_dataset+'/'+args.arch+'_'+args.mode+'_proj_'+str(args.proj_noise_rate)+'_trial_'+args.trial)
     net.load_state_dict(checkpoint)
     net.eval()
 
@@ -44,9 +45,9 @@ def main():
     test_features_proj, y = test(args, net, test_dataloader, optimizer, scheduler, forward_part='projection')
     draw_tSNE(test_features_proj, y,'projection',args)
 
-    # Drawing 10 embedding
-    test_features_linear, y = test(args, net, test_dataloader, optimizer, scheduler, forward_part='linear')
-    draw_tSNE(test_features_linear, y,'linear',args)
+    # # Drawing 10 embedding
+    # test_features_linear, y = test(args, net, test_dataloader, optimizer, scheduler, forward_part='linear')
+    # draw_tSNE(test_features_linear, y,'linear',args)
 
 def test(args, net, test_dataloader, optimizer, scheduler, forward_part):
     net.eval()
