@@ -74,7 +74,7 @@ def main():
     
     # Linear Setting
     path = './checkpoint/'+args.in_dataset+'/'+args.arch+'_'+args.mode+'_proj_'+str(args.proj_noise_rate)+'_linear_'+str(args.linear_noise_rate)+'_trial_'+args.trial
-    args.lr = 5.
+    args.lr = 0.5
     args.epoch = 100
     optimizer_linear, scheduler_linear = get_optim_scheduler(args,net)
 

@@ -23,7 +23,7 @@ def main():
         args.num_classes=100
 
     # Get Dataloader
-    train_dataloader, test_dataloader = globals()[args.in_dataset](args, mode = 'linear')
+    _, train_dataloader, test_dataloader = globals()[args.in_dataset](args, mode = 'train')
 
     # Get architecture
     net = get_architecture(args)
