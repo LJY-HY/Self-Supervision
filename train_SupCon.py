@@ -22,7 +22,10 @@ def main():
     torch.cuda.set_device(device)
 
     # tensorboard
-    writer = SummaryWriter('SupConLoss/'+args.mode+'_proj_'+str(args.proj_noise_rate)+'_linear_'+str(args.linear_noise_rate))
+    if args.mixup:
+        writer = SummaryWriter('SupConLoss/'+args.mode+'_proj_'+str(args.proj_noise_rate)+'_linear_'+str(args.linear_noise_rate)+'_mixup')
+    else:      
+        writer = SummaryWriter('SupConLoss/'+args.mode+'_proj_'+str(args.proj_noise_rate)+'_linear_'+str(args.linear_noise_rate))
 
     # dataset/transform setting
     if args.in_dataset in ['cifar10']:
@@ -40,14 +43,21 @@ def main():
     optimizer_proj, scheduler_proj = get_optim_scheduler(args,net)
     
     # Define Loss
-    XentLoss = nn.CrossEntropyLoss()
     if args.mode == 'SupCon':
-        ContrastiveLoss = SupConLoss(temperature=0.1,mode = args.mode, mixup = args.mixup)
+        temperature = 0.1
     elif args.mode == 'SimCLR':
-        ContrastiveLoss = SupConLoss(temperature=0.5,mode = args.mode, mixup = args.mixup)
+        temperature = 0.5
+    elif args.mode == 'Xent':
+        temperature = 1
+    XentLoss = nn.CrossEntropyLoss()
+    ContrastiveLoss = SupConLoss(temperature=temperature,mode = args.mode, mixup = args.mixup)
+   
 
     # Projection Training
-    path = './checkpoint/'+args.in_dataset+'/'+args.arch+'_'+args.mode+'_proj_'+str(args.proj_noise_rate)+'_trial_'+args.trial
+    if args.mixup:
+        path = './checkpoint/'+args.in_dataset+'/'+args.arch+'_'+args.mode+'_proj_'+str(args.proj_noise_rate)+'_mixup_trial_'+args.trial
+    else:
+        path = './checkpoint/'+args.in_dataset+'/'+args.arch+'_'+args.mode+'_proj_'+str(args.proj_noise_rate)+'_trial_'+args.trial
     if not os.path.isfile(path):
         best_loss = 100.
         for epoch in range(args.epoch):
