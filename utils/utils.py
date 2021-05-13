@@ -88,7 +88,7 @@ def get_transform(args,mode):
         transforms.ToTensor(),
         normalize,
         ])
-        return train_TF, test_TF
+        return train_TF, train_TF, test_TF
     
 class TwoCropTransform:
     "Create 2-way augmented images"

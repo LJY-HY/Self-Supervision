@@ -21,11 +21,14 @@ def main():
         args.num_classes=100
 
     # Get Dataloader
-    _, test_dataloader = globals()[args.in_dataset](args, mode = 'eval')
+    _, _, test_dataloader = globals()[args.in_dataset](args, mode = 'eval')
 
     # Get architecture
     net = get_architecture(args)
-    path = './checkpoint/'+args.in_dataset+'/'+args.arch+'_'+args.mode+'_proj_'+str(args.proj_noise_rate)+'_linear_'+str(args.linear_noise_rate)+'_trial_'+args.trial
+    if args.mode in ['SimCLR', 'SupCon']:
+        path = './checkpoint/'+args.in_dataset+'/'+args.arch+'_'+args.mode+'_proj_'+str(args.proj_noise_rate)+'_linear_'+str(args.linear_noise_rate)+'_trial_'+args.trial
+    elif args.mode in ['Xent']:
+        path = './checkpoint/'+args.in_dataset+'/'+args.arch+'_'+args.mode+'_'+str(args.noise_rate)+'_trial_'+args.trial
     checkpoint = torch.load(path)
     net.load_state_dict(checkpoint)
     net.eval()

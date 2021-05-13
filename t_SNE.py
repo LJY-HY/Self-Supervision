@@ -25,7 +25,6 @@ def main():
         args.num_classes=100
 
     # Get Dataloader
-    args.noise_rate = args.proj_noise_rate
     train_proj_dataloader, train_linear_dataloader, test_dataloader = globals()[args.in_dataset](args,mode = 'train')
    
     # Get architecture
@@ -36,18 +35,21 @@ def main():
     scheduler = optim.lr_scheduler.MultiStepLR(optimizer, [10,15],gamma=0.2)
 
     # Get model ckpt
-    checkpoint = torch.load('./checkpoint/'+args.in_dataset+'/'+args.arch+'_'+args.mode+'_proj_'+str(args.proj_noise_rate)+'_linear_'+str(args.linear_noise_rate)+'_trial_'+args.trial)
-    # checkpoint = torch.load('./checkpoint/'+args.in_dataset+'/'+args.arch+'_'+args.mode+'_proj_'+str(args.proj_noise_rate)+'_trial_'+args.trial)
+    if args.mode in ['Supcon', 'SimCLR']:
+        checkpoint = torch.load('./checkpoint/'+args.in_dataset+'/'+args.arch+'_'+args.mode+'_proj_'+str(args.proj_noise_rate)+'_linear_'+str(args.linear_noise_rate)+'_trial_'+args.trial)
+    elif args.mode in ['Xent']:
+        checkpoint = torch.load('./checkpoint/'+args.in_dataset+'/'+args.arch+'_'+args.mode+'_'+str(args.noise_rate)+'_trial_'+args.trial)
     net.load_state_dict(checkpoint)
     net.eval()
 
-    # Drawing 512 embedding
+    # projection drawing
     test_features_proj, y = test(args, net, test_dataloader, optimizer, scheduler, forward_part='projection')
     draw_tSNE(test_features_proj, y,'projection',args)
 
-    # Drawing 10 embedding
+    # linear drawing
     test_features_linear, y = test(args, net, test_dataloader, optimizer, scheduler, forward_part='linear')
     draw_tSNE(test_features_linear, y,'linear',args)
+  
 
 def test(args, net, test_dataloader, optimizer, scheduler, forward_part):
     net.eval()
@@ -81,7 +83,10 @@ def draw_tSNE(test_features,y,embedding_mode,args):
     df['y'] = tsne_ref[:,1]
     df['Label'] = y[:]
     # sns.scatterplot(x="x", y="y", hue="y", palette=sns.color_palette("hls", 10), data=df)
-    sns.lmplot(x="x", y="y", data=df, fit_reg=False, legend=True, size=9, hue='Label', scatter_kws={"s":200, "alpha":0.5}).savefig(args.mode+'_proj_noise_'+str(args.proj_noise_rate)+'_linear_noise_'+str(args.linear_noise_rate)+'_'+embedding_mode+'.png')
+    if args.mode in ['SimCLR','SupCon']:
+        sns.lmplot(x="x", y="y", data=df, fit_reg=False, legend=True, size=9, hue='Label', scatter_kws={"s":200, "alpha":0.5}).savefig(args.mode+'_proj_noise_'+str(args.proj_noise_rate)+'_linear_noise_'+str(args.linear_noise_rate)+'_'+embedding_mode+'.png')
+    elif args.mode in ['Xent']:
+        sns.lmplot(x="x", y="y", data=df, fit_reg=False, legend=True, size=9, hue='Label', scatter_kws={"s":200, "alpha":0.5}).savefig(args.mode+'_noise_'+str(args.noise_rate)+'_'+embedding_mode+'.png')
     
     plt.title('t-SNE result', weight='bold').set_fontsize('14')
     plt.xlabel('x', weight='bold').set_fontsize('10')

@@ -30,7 +30,7 @@ def get_test_arguments():
     parser.add_argument('--lr', default = 0.5, type=float)
     parser.add_argument('--epoch', default=100, type=int, help='number of total epochs')
     parser.add_argument('--batch_size', default=256, type=int, choices=[64,128,256,512])
-    parser.add_argument('--scheduler', default='CosinAnnealing', type=str, choices=['MultiStepLR','CosineAnnealing','CosineWarmup'])
+    parser.add_argument('--scheduler', default='CosineAnnealing', type=str, choices=['MultiStepLR','CosineAnnealing','CosineWarmup'])
     parser.add_argument('--warmup_duration', default=10, type=int, help='length of warming')
     parser.add_argument('--noise_rate', default=0., type=float, choices=[0.,0.2,0.4,0.6,0.8])
     parser.add_argument('--proj_noise_rate', default=0., type=float, choices=[0.,0.2,0.4,0.6,0.8])
