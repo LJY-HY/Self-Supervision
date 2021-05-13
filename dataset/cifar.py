@@ -16,8 +16,8 @@ def cifar10(args, mode = 'train'):
         train_linear_dataset.train_labels = train_proj_dataset.train_labels
         train_linear_dataset.train_labels_true = train_proj_dataset.train_labels_true
     elif args.linear_noise_rate != args.proj_noise_rate:
-        train_linear_dataset = CIFAR10_noisy(root = '/home/esoc/repo/datasets/pytorch/cifar10', train=True, corruption_prob = args.linear_noise_rate, transform = train_proj_TF, download=True)
-        train_proj_dataset = CIFAR10_noisy(root = '/home/esoc/repo/datasets/pytorch/cifar10', train=True, corruption_prob = args.proj_noise_rate, transform = train_linear_TF, download=True)
+        train_proj_dataset = CIFAR10_noisy(root = '/home/esoc/repo/datasets/pytorch/cifar10', train=True, corruption_prob = args.proj_noise_rate, transform = train_proj_TF, download=True)
+        train_linear_dataset = CIFAR10_noisy(root = '/home/esoc/repo/datasets/pytorch/cifar10', train=True, corruption_prob = args.linear_noise_rate, transform = train_linear_TF, download=True)
     test_dataset = datasets.CIFAR10(root = '/home/esoc/repo/datasets/pytorch/cifar10', train=False, transform = test_TF, download=False)
 
     train_proj_dataloader = DataLoader(train_proj_dataset, batch_size = args.batch_size, shuffle = True, num_workers = 8)
