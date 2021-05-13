@@ -4,9 +4,8 @@ import torch.distributions.dirichlet as diri
 
 class SupConLoss(nn.Module):
     """SupConLoss class support both supervised version(SupCon) and unsupervised version(SimCLR)"""
-    def __init__(self,temperature = 0.07, base_temperature = 0.07, contrast = True, mode = 'SupCon', mixup = False):
+    def __init__(self,temperature = 0.07, base_temperature = 0.07, contrast = True, mode = 'SupCon'):
         super(SupConLoss,self).__init__()
-        self.mixup = mixup
         self.mode = mode
         self.temperature = temperature
         self.base_temperatrue= base_temperature

@@ -6,14 +6,14 @@ import torchvision.transforms as transforms
 import os
 from tqdm import tqdm
 import argparse
-from utils.arguments import get_arguments
+from utils.arguments import get_Xent_arguments
 from utils.utils import *
 from dataset.cifar import *
 
 def main():
     # Argument parsing
     args = argparse.ArgumentParser()
-    args = get_arguments()
+    args = get_Xent_arguments()
     args.device = torch.device('cuda',args.gpu_id)
 
     # dataset/transform setting
@@ -23,7 +23,7 @@ def main():
         args.num_classes=100
 
     # Get Dataloader
-    _, train_dataloader, test_dataloader = globals()[args.in_dataset](args, mode = 'train')
+    train_dataloader, test_dataloader = globals()[args.in_dataset](args)
 
     # Get architecture
     net = get_architecture(args)
@@ -48,7 +48,7 @@ def train(args, net, train_dataloader, optimizer, scheduler, CE_loss, epoch):
     net.train()
     train_loss = 0
     p_bar = tqdm(range(train_dataloader.__len__()))
-    for batch_idx, (inputs, targets,targets_true) in enumerate(train_dataloader):
+    for batch_idx, (inputs, targets, targets_true) in enumerate(train_dataloader):
         inputs, targets = inputs.to(args.device), targets.to(args.device)     
         optimizer.zero_grad()
         outputs = net(inputs)

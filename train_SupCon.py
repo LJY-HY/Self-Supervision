@@ -22,10 +22,7 @@ def main():
     torch.cuda.set_device(device)
 
     # tensorboard
-    if args.mixup:
-        writer = SummaryWriter('SupConLoss/'+args.mode+'_proj_'+str(args.proj_noise_rate)+'_linear_'+str(args.linear_noise_rate)+'_mixup')
-    else:      
-        writer = SummaryWriter('SupConLoss/'+args.mode+'_proj_'+str(args.proj_noise_rate)+'_linear_'+str(args.linear_noise_rate))
+    writer = SummaryWriter('SupConLoss/'+args.mode+'_proj_'+str(args.proj_noise_rate)+'_linear_'+str(args.linear_noise_rate)+str(args.mixup))
 
     # dataset/transform setting
     if args.in_dataset in ['cifar10']:
@@ -34,7 +31,7 @@ def main():
         args.num_classes=100
 
     # Get Dataloader
-    train_proj_dataloader, train_linear_dataloader, test_dataloader = globals()[args.in_dataset](args,mode = 'train')
+    train_proj_dataloader, train_linear_dataloader, test_dataloader = globals()[args.in_dataset](args)
    
     # Get architecture
     net = get_architecture(args)
@@ -47,17 +44,12 @@ def main():
         temperature = 0.1
     elif args.mode == 'SimCLR':
         temperature = 0.5
-    elif args.mode == 'Xent':
-        temperature = 1
     XentLoss = nn.CrossEntropyLoss()
-    ContrastiveLoss = SupConLoss(temperature=temperature,mode = args.mode, mixup = args.mixup)
+    ContrastiveLoss = SupConLoss(temperature=temperature,mode = args.mode)
    
 
     # Projection Training
-    if args.mixup:
-        path = './checkpoint/'+args.in_dataset+'/'+args.arch+'_'+args.mode+'_proj_'+str(args.proj_noise_rate)+'_mixup_trial_'+args.trial
-    else:
-        path = './checkpoint/'+args.in_dataset+'/'+args.arch+'_'+args.mode+'_proj_'+str(args.proj_noise_rate)+'_trial_'+args.trial
+    path = './checkpoint/'+args.in_dataset+'/'+args.arch+'_'+args.mode+'_proj_'+str(args.proj_noise_rate)+'_trial_'+args.trial+str(args.mixup)
     if not os.path.isfile(path):
         best_loss = 100.
         for epoch in range(args.epoch):
@@ -72,7 +64,7 @@ def main():
                     os.makedirs('checkpoint/'+args.in_dataset)
                 torch.save(net.state_dict(), path)
     else:
-        checkpoint = torch.load('./checkpoint/'+args.in_dataset+'/'+args.arch+'_'+args.mode+'_proj_'+str(args.proj_noise_rate)+'_trial_'+args.trial)
+        checkpoint = torch.load('./checkpoint/'+args.in_dataset+'/'+args.arch+'_'+args.mode+'_proj_'+str(args.proj_noise_rate)+'_trial_'+args.trial+str(args.mixup))
         net.load_state_dict(checkpoint)
         net.train()
 
@@ -83,7 +75,7 @@ def main():
     net.linear.bias.requires_grad = True
     
     # Linear Setting
-    path = './checkpoint/'+args.in_dataset+'/'+args.arch+'_'+args.mode+'_proj_'+str(args.proj_noise_rate)+'_linear_'+str(args.linear_noise_rate)+'_trial_'+args.trial
+    path = './checkpoint/'+args.in_dataset+'/'+args.arch+'_'+args.mode+'_proj_'+str(args.proj_noise_rate)+'_linear_'+str(args.linear_noise_rate)+'_trial_'+args.trial+str(args.mixup)
     args.lr = 0.1
     args.wd = 1e-4
     args.epoch = 50
@@ -121,7 +113,7 @@ def projection_train(args, net, train_proj_dataloader, optimizer, scheduler, Sup
         images = torch.cat([images[0],images[1]],dim=0)
         images, labels = images.to(args.device), labels.to(args.device)     
         optimizer.zero_grad()
-        if args.mixup:
+        if args.mixup=='mixup':
             randidx = torch.randperm(bsz)
             randidx = torch.cat((randidx,randidx+bsz),dim=0)
             images_perm = images[randidx]

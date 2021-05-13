@@ -25,8 +25,9 @@ def main():
         args.num_classes=100
 
     # Get Dataloader
-    train_proj_dataloader, train_linear_dataloader, test_dataloader = globals()[args.in_dataset](args,mode = 'train')
-   
+    dataloader_list = globals()[args.in_dataset](args)
+    test_dataloader = dataloader_list[-1]
+
     # Get architecture
     net = get_architecture(args)
 
@@ -35,8 +36,8 @@ def main():
     scheduler = optim.lr_scheduler.MultiStepLR(optimizer, [10,15],gamma=0.2)
 
     # Get model ckpt
-    if args.mode in ['Supcon', 'SimCLR']:
-        checkpoint = torch.load('./checkpoint/'+args.in_dataset+'/'+args.arch+'_'+args.mode+'_proj_'+str(args.proj_noise_rate)+'_linear_'+str(args.linear_noise_rate)+'_trial_'+args.trial)
+    if args.mode in ['SupCon', 'SimCLR']:
+        checkpoint = torch.load('./checkpoint/'+args.in_dataset+'/'+args.arch+'_'+args.mode+'_proj_'+str(args.proj_noise_rate)+'_linear_'+str(args.linear_noise_rate)+'_trial_'+args.trial+args.mixup)
     elif args.mode in ['Xent']:
         checkpoint = torch.load('./checkpoint/'+args.in_dataset+'/'+args.arch+'_'+args.mode+'_'+str(args.noise_rate)+'_trial_'+args.trial)
     net.load_state_dict(checkpoint)

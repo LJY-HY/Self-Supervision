@@ -47,7 +47,7 @@ def get_optim_scheduler(args,net,epoch_per_step=None):
         scheduler = CosineAnnealingWarmupRestarts(optimizer, first_cycle_steps = epoch_per_step, cycle_mult=1.0, max_lr = args.lr, min_lr = args.lr/100, warmup_steps = 10, gamma = 1.0)
     return optimizer, scheduler
 
-def get_transform(args,mode):
+def get_transform(args):
     if args.in_dataset == 'cifar10':
         normalize = transforms.Normalize(mean = cifar10_mean, std = cifar10_std)
     elif args.in_dataset == 'cifar100':
@@ -55,40 +55,28 @@ def get_transform(args,mode):
     elif args.in_dataset == 'svhn':
         normalize = transforms.Normalize(mean = cifar10_mean, std = cifar10_std)
         
-    if mode == 'train':
-        train_proj_TF = transforms.Compose([
-            transforms.RandomResizedCrop(size = 32, scale = (0.2,1.)),
-            transforms.RandomHorizontalFlip(),
-            transforms.RandomApply([
-                transforms.ColorJitter(0.4,0.4,0.4,0.1)
-                ],p=0.8),
-            transforms.RandomGrayscale(p=0.2),
-            transforms.ToTensor(),
-            normalize,
-            ])
-        train_linear_TF = transforms.Compose([
-            transforms.RandomHorizontalFlip(),
-            transforms.RandomCrop(size=32, padding = int(32*0.125)),
-            transforms.ToTensor(),
-            normalize,
-        ])
-        test_TF = transforms.Compose([
+    train_proj_TF = transforms.Compose([
+        transforms.RandomResizedCrop(size = 32, scale = (0.2,1.)),
+        transforms.RandomHorizontalFlip(),
+        transforms.RandomApply([
+            transforms.ColorJitter(0.4,0.4,0.4,0.1)
+            ],p=0.8),
+        transforms.RandomGrayscale(p=0.2),
         transforms.ToTensor(),
         normalize,
         ])
-        return TwoCropTransform(train_proj_TF), train_linear_TF, test_TF
-    elif mode == 'eval':
-        train_TF = transforms.Compose([
-            transforms.RandomHorizontalFlip(),
-            transforms.RandomCrop(size=32, padding = int(32*0.125)),
-            transforms.ToTensor(),
-            normalize,
-        ])
-        test_TF = transforms.Compose([
+    train_linear_TF = transforms.Compose([
+        transforms.RandomHorizontalFlip(),
+        transforms.RandomCrop(size=32, padding = int(32*0.125)),
         transforms.ToTensor(),
         normalize,
-        ])
-        return train_TF, train_TF, test_TF
+    ])
+    test_TF = transforms.Compose([
+    transforms.ToTensor(),
+    normalize,
+    ])
+    return TwoCropTransform(train_proj_TF), train_linear_TF, test_TF
+  
     
 class TwoCropTransform:
     "Create 2-way augmented images"
