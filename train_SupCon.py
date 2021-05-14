@@ -76,9 +76,9 @@ def main():
     
     # Linear Setting
     path = './checkpoint/'+args.in_dataset+'/'+args.arch+'_'+args.mode+'_proj_'+str(args.proj_noise_rate)+'_linear_'+str(args.linear_noise_rate)+'_trial_'+args.trial+str(args.mixup)
-    args.lr = 0.1
+    args.lr = 5.
     args.wd = 0
-    args.epoch = 50
+    args.epoch = 100
     optimizer_linear, scheduler_linear = get_optim_scheduler(args,net)
 
     # Linear Training
@@ -105,7 +105,10 @@ def main():
 
 
 def projection_train(args, net, train_proj_dataloader, optimizer, scheduler, SupConLoss, epoch, forward_part):
-    net.train()
+    net.eval()
+    for child in net.children():
+        if type(child)== torch.nn.Linear:
+            child.train()
     train_loss = 0
     p_bar = tqdm(range(train_proj_dataloader.__len__()))
     for batch_idx, (images, labels, true_labels) in enumerate(train_proj_dataloader):

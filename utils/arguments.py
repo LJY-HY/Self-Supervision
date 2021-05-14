@@ -56,6 +56,7 @@ def get_test_arguments():
     parser.add_argument('--linear_noise_rate', default=0., type=float, choices=[0.,0.2,0.4,0.6,0.8])
     parser.add_argument('--wd', '--weight_decay','--wdecay', default=1e-4, type=float, choices=[5e-4,1e-2,1e-3,1e-4,1e-5,1e-6])
     parser.add_argument('--mode', default='SupCon',choices=['SupCon','SimCLR','Xent'])
+    parser.add_argument('--mixup', default='', choices=['mixup'])
     parser.add_argument('--trial', default = '0', type=str)
     args = parser.parse_args()
     return args

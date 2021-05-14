@@ -7,6 +7,12 @@ from utils.utils import *
 from dataset.CIFAR.CIFAR import CIFAR10_noisy,CIFAR100_noisy
 
 def cifar10(args):
+    '''
+    TF_list :
+        (1) TwoCropTransform
+        (2) Basic Linear Transformation
+        (3) Test Transformation
+    '''
     TF_list = get_transform(args)
     if args.mode in ['SupCon','SimCLR']:
         train_proj_dataset = CIFAR10_noisy(root = '/home/esoc/repo/datasets/pytorch/cifar10', train=True, corruption_prob = args.proj_noise_rate, transform = TF_list[0], download=True)
