@@ -72,8 +72,8 @@ def get_transform(args):
         normalize,
     ])
     test_TF = transforms.Compose([
-    transforms.ToTensor(),
-    normalize,
+        transforms.ToTensor(),
+        normalize,
     ])
     return TwoCropTransform(train_proj_TF), train_linear_TF, test_TF
   
