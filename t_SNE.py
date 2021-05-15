@@ -39,7 +39,7 @@ def main():
     if args.mode in ['SupCon', 'SimCLR']:
         checkpoint = torch.load('./checkpoint/'+args.in_dataset+'/'+args.arch+'_'+args.mode+'_proj_'+str(args.proj_noise_rate)+'_linear_'+str(args.linear_noise_rate)+'_trial_'+args.trial+args.mixup)
     elif args.mode in ['Xent']:
-        checkpoint = torch.load('./checkpoint/'+args.in_dataset+'/'+args.arch+'_'+args.mode+'_'+str(args.noise_rate)+'_trial_'+args.trial)
+        checkpoint = torch.load('./checkpoint/'+args.in_dataset+'/'+args.arch+'_'+args.mode+'_'+str(args.noise_rate)+'_trial_'+args.trial+args.mixup)
     net.load_state_dict(checkpoint)
     net.eval()
 
@@ -85,9 +85,9 @@ def draw_tSNE(test_features,y,embedding_mode,args):
     df['Label'] = y[:]
     # sns.scatterplot(x="x", y="y", hue="y", palette=sns.color_palette("hls", 10), data=df)
     if args.mode in ['SimCLR','SupCon']:
-        sns.lmplot(x="x", y="y", data=df, fit_reg=False, legend=True, size=9, hue='Label', scatter_kws={"s":200, "alpha":0.5}).savefig(args.mode+'_proj_noise_'+str(args.proj_noise_rate)+'_linear_noise_'+str(args.linear_noise_rate)+'_'+embedding_mode+'.png')
+        sns.lmplot(x="x", y="y", data=df, fit_reg=False, legend=True, size=9, hue='Label', scatter_kws={"s":200, "alpha":0.5}).savefig('t_SNE/'+args.mode+'_proj_noise_'+str(args.proj_noise_rate)+'_linear_noise_'+str(args.linear_noise_rate)+'_'+embedding_mode+args.mixup+'.png')
     elif args.mode in ['Xent']:
-        sns.lmplot(x="x", y="y", data=df, fit_reg=False, legend=True, size=9, hue='Label', scatter_kws={"s":200, "alpha":0.5}).savefig(args.mode+'_noise_'+str(args.noise_rate)+'_'+embedding_mode+'.png')
+        sns.lmplot(x="x", y="y", data=df, fit_reg=False, legend=True, size=9, hue='Label', scatter_kws={"s":200, "alpha":0.5}).savefig('t_SNE/'+args.mode+'_noise_'+str(args.noise_rate)+'_'+embedding_mode+args.mixup+'.png')
     
     plt.title('t-SNE result', weight='bold').set_fontsize('14')
     plt.xlabel('x', weight='bold').set_fontsize('10')
